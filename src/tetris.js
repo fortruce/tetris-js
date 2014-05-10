@@ -160,7 +160,7 @@ var GridRow = React.createClass({
   render: function() {
   	var i = 0;
     var gridCells = this.props.row.map(function (cell) {
-      return <GridCell key={i++}>{cell}</GridCell>;
+      return <GridCell key={i++} color={cell}></GridCell>;
     });
     return (
       <div className="grid-row">
@@ -181,7 +181,7 @@ var GridCell = React.createClass({
   	return color;
   },
   render: function() {
-  	var color = this.getColor(this.props.children);
+  	var color = this.getColor(this.props.color);
   	var className = "grid-cell " + color;
     return (
       <div className={className}></div>
