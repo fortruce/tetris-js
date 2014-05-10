@@ -87,13 +87,13 @@ function isValidState (board, piece, pos) {
 	return true;
 }
 
-function resetBoard() {
-	return repeat([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 21);
+function emptyBoard() {
+	return repeat(repeat(0, 10), 21);
 }
 
 var Game = React.createClass({
   getInitialState: function() {
-  	return {board: resetBoard(),
+  	return {board: emptyBoard(),
   	        piece: [],
   	        pos:   [4, 0],
   	        state: "start"};
@@ -124,7 +124,7 @@ var Game = React.createClass({
   },
   startGame: function(event) {
   	this.setState({state: "playing",
-  				   board: resetBoard(),
+  				   board: emptyBoard(),
   				   piece: getPiece(),
   				   pos: [4, 0]});
   },
