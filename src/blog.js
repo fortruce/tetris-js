@@ -2,16 +2,7 @@
  * @jsx React.DOM
  */
 
-function repeat (x, n) {
-	// repeat x n times
-	var z = [];
-	for (i = 0; i < n; i++) {
-		z.push(x);
-	}
-	return z;
-}
-
-const pieces = [
+ const pieces = [
   [[0, 0, 2, 0],
    [0, 0, 2, 0],
    [0, 0, 2, 0],
@@ -33,9 +24,10 @@ const pieces = [
   [[0, 8, 0],
    [8, 8, 8],
    [0, 0, 0]]];
-
+   
 function getPiece () {
-    return pieces[Math.floor((Math.random() * 7))];
+	var r = Math.floor((Math.random() * 7));
+    return pieces[r];
 }
 
 function outOfBounds (bx, by) {
@@ -86,10 +78,6 @@ function isValidState (board, piece, pos) {
 	return true;
 }
 
-function emptyBoard() {
-	return repeat(repeat(0, 10), 21);
-}
-
 var Game = React.createClass({
   getInitialState: function() {
   	return {board: emptyBoard(),
@@ -97,56 +85,41 @@ var Game = React.createClass({
   	        pos:   [4, 0],
   	        state: "start"};
   },
-  componentDidMount: function() {
-  	var descend = function() {
-  		if (this.state.state !== "playing")
-  			return;
-	  	var newPos = this.state.pos.slice(0);
-	  	newPos[1]++;
-	  	if (isValidState(this.state.board, this.state.piece, newPos)) {
-	  		this.setState({pos: newPos});
-	  	}
-	  	else {
-	  		var npiece = getPiece();
-	  		var mergedBoard = mergePiece(this.state.board,
-	  										this.state.piece,
-	  										this.state.pos,
-	  										false);
-	  		var state = isValidState(mergedBoard, npiece, [4, 0]) ? "playing" : "gameover";
-	  		this.setState({board: mergedBoard,
-	  						piece: npiece,
-	  						pos: [4, 0],
-	  						state: state});
-	  	}
-	}.bind(this);
-  	setInterval(descend, this.props.fallingInterval);
-  },
   startGame: function(event) {
-  	this.setState({state: "playing",
-  				   board: emptyBoard(),
-  				   piece: getPiece(),
-  				   pos: [4, 0]});
+    this.setState({state: "playing",
+    			   board: emptyBoard(),
+                   piece: getPiece(),
+                   pos:   [4, 0]});
   },
-  pauseGame: function(event) {
-  	this.setState({state: "paused"});
+  loop: function() {
+    if (this.state.state !== "playing")
+      return;
+    var newPos = this.state.pos.slice(0);
+    newPos[1]++;
+    if (isValidState(this.state.board, this.state.piece, newPos))
+      this.setState({pos: newPos});
+    else {
+      var mergedBoard = mergePiece(this.state.board, this.state.piece,
+      							this.state.pos, true);
+      var newPiece = getPiece();
+      this.setState({board: mergedBoard,
+      				 piece: newPiece,
+                     pos: [4, 0]});
+    }
+  },
+  componentDidMount: function() {
+    setInterval(this.loop, 250);
   },
   render: function() {
-  	// do not merge the piece in before start
-  	var mergedBoard = mergePiece(this.state.board, this.state.piece, this.state.pos,
-  					this.state.state === "playing" ? false : true);
-  	var i = 0;
+    var i = 0;
+    var mergedBoard = mergePiece(this.state.board, this.state.piece,
+    							this.state.pos, true);
     var gridRows = mergedBoard.map(function (row) {
       return <GridRow row={row} key={i++}/>;
     });
     return (
       <div className="container">
-		<p className="start-button" onClick={this.startGame}>
-	      "START"
-	    </p>
-	    <p onClick={this.pauseGame}>
-	      "PAUSE GAME"
-	    </p>
-	    <p>{this.state.state}</p>
+        <button type="button" onClick={this.startGame}>START</button>
         <div className="grid-container">
         {gridRows}
         </div>
@@ -154,12 +127,12 @@ var Game = React.createClass({
     );
   }
 });
-
+  
 var GridRow = React.createClass({
   render: function() {
   	var i = 0;
     var gridCells = this.props.row.map(function (cell) {
-      return <GridCell key={i++} color={cell}></GridCell>;
+      return <GridCell key={i++} value={cell}></GridCell>;
     });
     return (
       <div className="grid-row">
@@ -168,27 +141,29 @@ var GridRow = React.createClass({
     );
   }
 });
-                             
+
 var GridCell = React.createClass({
-  getColor: function(i) {
-  	var color = "filled";
-  	if (i === 0)
-  		color = "blank";
-  	if (i > 1 && i <= 8) {
-  		color = "colored color" + i;
-  	}
-  	return color;
-  },
   render: function() {
-  	var color = this.getColor(this.props.color);
-  	var className = "grid-cell " + color;
     return (
-      <div className={className}>{this.props.color}</div>
+      <div className="grid-cell">{this.props.value}</div>
     );
   }
 });
 
+function repeat (x, n) {
+	// repeat x n times
+	var z = [];
+	for (i = 0; i < n; i++) {
+		z.push(x);
+	}
+	return z;
+}
+
+function emptyBoard() {
+	return repeat(repeat(0, 10), 21);
+}
+
 React.renderComponent(
-	<Game fallingInterval={150} />,
+	<Game />,
 	document.getElementById('target')
 );
